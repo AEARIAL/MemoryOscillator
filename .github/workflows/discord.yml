@@ -1,0 +1,198 @@
+
+name: Discord 通知
+
+on:
+  push:
+  pull_request:
+  pull_request_review:
+  pull_request_review_comment:
+  issue_comment:
+  issues:
+  release:
+  create:
+  delete:
+  fork:
+  watch:
+  workflow_run:
+    workflows:
+      - "*"
+    types:
+      - completed
+
+jobs:
+  discord:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Discordへ通知
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          ACTOR: ${{ github.actor }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENT_URL: ${{ github.event.comment.html_url }}
+
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+
+          WORKFLOW_NAME: ${{ github.event.workflow.name }}
+          WORKFLOW_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}
+
+        run: |
+          safe() {
+            echo "$1" | tr -d '\000-\011\013\014\016-\037' | head -c 1000
+          }
+
+          TITLE="📣 GitHub通知"
+          DESCRIPTION="GitHubでアクティビティが発生しました"
+          DETAILS="詳細なし"
+          URL="https://github.com/${REPOSITORY}"
+          COLOR=9807270
+
+          if [ "$EVENT_NAME" = "push" ]; then
+            TITLE="🚀 Push"
+            DESCRIPTION="$ACTOR が $REF_NAME にPushしました"
+            DETAILS="$COMMIT_MESSAGE"
+            URL="https://github.com/${REPOSITORY}/commits/${REF_NAME}"
+            COLOR=5763719
+
+          elif [ "$EVENT_NAME" = "pull_request" ]; then
+            TITLE="🔀 Pull Request"
+            DESCRIPTION="$ACTOR がPRを $ACTION"
+            DETAILS="$PR_TITLE"
+            URL="$PR_URL"
+            COLOR=15548997
+
+          elif [ "$EVENT_NAME" = "pull_request_review" ]; then
+            TITLE="✅ PRレビュー"
+            DESCRIPTION="$ACTOR がレビューしました"
+            DETAILS="$PR_TITLE"
+            URL="$PR_URL"
+            COLOR=3066993
+
+          elif [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
+            TITLE="💬 コードレビューコメント"
+            DESCRIPTION="$ACTOR がコメントしました"
+            DETAILS="$COMMENT_BODY"
+            URL="$COMMENT_URL"
+            COLOR=10181046
+
+          elif [ "$EVENT_NAME" = "issue_comment" ]; then
+            TITLE="🗨 コメント"
+            DESCRIPTION="$ACTOR がコメントしました"
+            DETAILS="$COMMENT_BODY"
+            URL="$COMMENT_URL"
+            COLOR=3447003
+
+          elif [ "$EVENT_NAME" = "issues" ]; then
+            TITLE="📌 Issue"
+            DESCRIPTION="Issue が $ACTION されました"
+            DETAILS="$ISSUE_TITLE"
+            URL="$ISSUE_URL"
+            COLOR=15844367
+
+          elif [ "$EVENT_NAME" = "release" ]; then
+            TITLE="🏷 Release"
+            DESCRIPTION="新しいリリースが公開されました"
+            DETAILS="$RELEASE_NAME"
+            URL="$RELEASE_URL"
+            COLOR=15105570
+
+          elif [ "$EVENT_NAME" = "workflow_run" ]; then
+            TITLE="⚙ Workflow"
+            DESCRIPTION="$WORKFLOW_NAME が完了"
+            DETAILS="$WORKFLOW_CONCLUSION"
+            URL="$WORKFLOW_URL"
+            COLOR=2067276
+
+          elif [ "$EVENT_NAME" = "fork" ]; then
+            TITLE="🍴 Fork"
+            DESCRIPTION="リポジトリがForkされました"
+            DETAILS="$ACTOR がForkしました"
+            COLOR=7419530
+
+          elif [ "$EVENT_NAME" = "watch" ]; then
+            TITLE="⭐ Star"
+            DESCRIPTION="リポジトリにStarされました"
+            DETAILS="$ACTOR がStarしました"
+            COLOR=15844367
+
+          elif [ "$EVENT_NAME" = "create" ]; then
+            TITLE="🌱 作成"
+            DESCRIPTION="ブランチまたはタグが作成されました"
+            DETAILS="$REF_NAME"
+            COLOR=3066993
+
+          elif [ "$EVENT_NAME" = "delete" ]; then
+            TITLE="🗑 削除"
+            DESCRIPTION="ブランチまたはタグが削除されました"
+            DETAILS="$REF_NAME"
+            COLOR=15158332
+          fi
+
+          TITLE=$(safe "$TITLE")
+          DESCRIPTION=$(safe "$DESCRIPTION")
+          DETAILS=$(safe "$DETAILS")
+          URL=$(safe "$URL")
+
+          jq -n \
+            --arg title "$TITLE" \
+            --arg description "$DESCRIPTION" \
+            --arg details "$DETAILS" \
+            --arg url "$URL" \
+            --arg actor "$ACTOR" \
+            --arg repository "$REPOSITORY" \
+            --arg event "$EVENT_NAME" \
+            --argjson color "$COLOR" \
+            '{
+              embeds: [
+                {
+                  title: $title,
+                  description: $description,
+                  url: $url,
+                  color: $color,
+                  fields: [
+                    {
+                      name: "👤 ユーザー",
+                      value: $actor,
+                      inline: true
+                    },
+                    {
+                      name: "📦 リポジトリ",
+                      value: $repository,
+                      inline: true
+                    },
+                    {
+                      name: "📡 イベント",
+                      value: $event,
+                      inline: true
+                    },
+                    {
+                      name: "📝 詳細",
+                      value: $details,
+                      inline: false
+                    }
+                  ]
+                }
+              ]
+            }' > payload.json
+
+          curl \
+            -H "Content-Type: application/json" \
+            -X POST \
+            -d @payload.json \
+            "$DISCORD_WEBHOOK"
+

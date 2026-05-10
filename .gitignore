@@ -1,0 +1,17 @@
+# Godot-specific ignores
+*.import
+.godot/
+
+# Godot-specific ignores (older versions)
+# import/
+
+# System-specific ignores
+.DS_Store
+Thumbs.db
+
+# Optional:
+# export_presets.cfg
+# .vscode/
+# *.tmp
+/.godot
+/.codex_backups
