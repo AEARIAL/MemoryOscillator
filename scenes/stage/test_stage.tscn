@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://ddgppu7k7v4ff"]
+[gd_scene load_steps=4 format=3 uid="uid://ddgppu7k7v4ff"]
 
 [ext_resource type="PackedScene" uid="uid://b8irsybebft0q" path="res://scenes/player/player.tscn" id="1_acvue"]
+[ext_resource type="PackedScene" uid="uid://04cnyavefrvm" path="res://scenes/stageobj/coin.tscn" id="2_k31ek"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k31ek"]
 size = Vector2(800.4, 20.2)
@@ -17,3 +18,9 @@ shape = SubResource("RectangleShape2D_k31ek")
 
 [node name="Player" parent="." instance=ExtResource("1_acvue")]
 position = Vector2(-95, -309)
+
+[node name="Coin" parent="." instance=ExtResource("2_k31ek")]
+position = Vector2(272, -157)
+
+[node name="Coin2" parent="." instance=ExtResource("2_k31ek")]
+position = Vector2(378, -298)
