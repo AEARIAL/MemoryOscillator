@@ -1,13 +1,13 @@
 [gd_scene load_steps=4 format=3 uid="uid://ddgppu7k7v4ff"]
 
 [ext_resource type="PackedScene" uid="uid://b8irsybebft0q" path="res://scenes/player/player.tscn" id="1_acvue"]
-[ext_resource type="PackedScene" uid="uid://04cnyavefrvm" path="res://scenes/stageobj/coin.tscn" id="2_k31ek"]
+[ext_resource type="PackedScene" uid="uid://cfg5x3f0pb5xg" path="res://scenes/stageobj/coin_spawner.tscn" id="2_k31ek"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k31ek"]
 size = Vector2(800.4, 20.2)
 
 [node name="TestStage" type="Node2D"]
-position = Vector2(618, 457)
+position = Vector2(619, 457)
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 
@@ -19,8 +19,22 @@ shape = SubResource("RectangleShape2D_k31ek")
 [node name="Player" parent="." instance=ExtResource("1_acvue")]
 position = Vector2(-95, -309)
 
-[node name="Coin" parent="." instance=ExtResource("2_k31ek")]
-position = Vector2(272, -157)
+[node name="CoinSpawner" parent="." instance=ExtResource("2_k31ek")]
+position = Vector2(-663, -977)
+spawn_count = 5
 
-[node name="Coin2" parent="." instance=ExtResource("2_k31ek")]
-position = Vector2(378, -298)
+[node name="SpawnArea" parent="CoinSpawner" index="0"]
+offset_right = 938.0
+offset_bottom = 900.0
+
+[node name="CoinSpawner2" parent="." instance=ExtResource("2_k31ek")]
+position = Vector2(328, -180)
+spawn_count = 20
+
+[node name="SpawnArea" parent="CoinSpawner2" index="0"]
+offset_top = -1005.0
+offset_right = 1657.0
+offset_bottom = 118.0
+
+[editable path="CoinSpawner"]
+[editable path="CoinSpawner2"]

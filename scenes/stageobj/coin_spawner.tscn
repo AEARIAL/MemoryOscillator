@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cfg5x3f0pb5xg"]
+
+[ext_resource type="Script" uid="uid://b54q6pprdrwit" path="res://scripts/manager/coin_spawner.gd" id="1_cggub"]
+
+[node name="CoinSpawner" type="Node2D"]
+script = ExtResource("1_cggub")
+
+[node name="SpawnArea" type="ReferenceRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
