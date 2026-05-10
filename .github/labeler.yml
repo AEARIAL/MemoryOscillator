@@ -1,0 +1,20 @@
+# ブランチ名に基づいた自動ラベル設定
+"Release Candidate":
+  - branch: ['^feature\/v-.*\/candidate']
+
+"Player Implementation":
+  - branch: ['^develop\/v-.*\/player_base']
+
+"Coin System":
+  - branch: ['^develop\/v-.*\/coin_system']
+
+"Logic/Script":
+  - changed-files:
+    - any-glob-to-any-file: 'scripts/**/*'
+
+"Design/Assets":
+  - changed-files:
+    - any-glob-to-any-file: 'assets/**/*'
+
+"⚠️ DEBUG/TEMP":
+  - branch: ['^debug\/.*', '^test\/.*']
