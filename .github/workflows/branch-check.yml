@@ -1,0 +1,35 @@
+name: "Branch Naming Check"
+
+on:
+  pull_request:
+    # PRが作成、編集、または新しいコミットがプッシュされたときに実行
+    types: [opened, edited, synchronized]
+
+jobs:
+  check-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Branch Name
+        run: |
+          # 1. PRの送信元ブランチ名を取得
+          BRANCH_NAME="${{ github.head_ref }}"
+          
+          # 2. 許可する命名規則を正規表現で定義
+          # パターン: (種類)/v-(数字.数字.数字)/(自由な機能名)
+          # 例: develop/v-0.1.0/player_base, feature/v-1.0.2/ui-fix
+          PATTERN="^(feature|develop|fix|release|chore)\/v-[0-9]+\.[0-9]+\.[0-9]+\/.*"
+          
+          echo "Checking branch name: $BRANCH_NAME"
+          
+          # 3. 判定
+          if [[ ! $BRANCH_NAME =~ $PATTERN ]]; then
+            echo "--------------------------------------------------------"
+            echo "❌ エラー: ブランチ命名規則に違反しています。"
+            echo "ブランチ名: $BRANCH_NAME"
+            echo "期待される形式: <type>/v-X.X.X/<description>"
+            echo "例: develop/v-0.1.0/player_base"
+            echo "--------------------------------------------------------"
+            exit 1
+          fi
+          
+          echo "✅ ブランチ名は適切です。"
