@@ -1,22 +1,20 @@
 extends Area2D
 
-# コインが取得されたことを外部（GameManagerなど）に伝えるためのシグナル
-signal collected
+@export var score_value: int = 10 
 
 func _ready() -> void:
-	# 自身の body_entered シグナルをこのスクリプトの関数に接続
-	# プレイヤー（CharacterBody2D）が接触した時に発火します
+	# 衝突イベントを接続
 	body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node2D) -> void:
-	# 接触した対象が "Player" という名前、もしくは Player クラスであるか確認
-	# (より厳密には body is CharacterBody2D などのチェックが望ましい)
+	# 衝突した相手の名前を確認（デバッグ用）
+	print("Hit: ", body.name)
+
+	# 相手が Player という名前だった場合
 	if body.name == "Player":
-		# シグナルを発火
-		collected.emit()
+		# GameManagerが存在するかチェックしてから加算
+		if GameManager:
+			GameManager.add_score(score_value)
 		
-		# ログ出力（デバッグ用）
-		print("コインをゲットしました！")
-		
-		# コインをシーンから削除
+		# コインを消去
 		queue_free()
